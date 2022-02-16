@@ -4,7 +4,7 @@ const app = express()
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const displayRoutes = require('express-routemap')
-const mySqlConnection = require('./config/mysql')
+// const mySqlConnection = require('./config/mysql')
 const userRoutes = require('./routes/users.routes')
 const billPaymentRoutes = require('./routes/bills_payments.routes')
 const paymentRoutes = require('./routes/payment.routes')
@@ -20,11 +20,11 @@ app.listen(port, () => {
     displayRoutes(app)
 })
 
-mySqlConnection.connect(err => {
-    if (err) throw err.stack
-    // connected!
-    console.log('successfully connected: ' , mySqlConnection.threadId)
-  })
+// mySqlConnection.connect(err => {
+//     if (err) throw err.stack
+//     // connected!
+//     console.log('successfully connected: ' , mySqlConnection.threadId)
+//   })
 
 
 app.use(morgan('combined'))

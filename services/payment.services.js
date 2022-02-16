@@ -19,9 +19,7 @@ const initalizePayment = async(data) => {
                         "ref": uuidv4()
                     }
                 })
-}
-
-
+    }
 
 const verifyPayment = async(payment_ref) => {
 
@@ -34,46 +32,50 @@ return axios({
         },
 })
     
-}
+    }
 
-const chargeTransaction = async(data) => {
+const chargeTransaction = async(input) => {
 
     return axios({
             method: "post",
             url: `${process.env.PAYSTACK_BASE_URL}/charge`,
             headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+                "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                "Content-Type": "application/json"
+                
             },
             data: {
-                "email": data.email,
-                "amount": parseFloat(data.amount) * 100,
+                "email": input.email,
+                "amount": parseFloat(input.amount) * 100,
                 "bank":
-                     {"cvv":data.bank.cvv,
-                        "accountNUmber": data.bank.accountNUmber
+                     {  "cvv":input.cvv,
+                        "accountNUmber": input.accountNUmber
                     },
-                "dob": data.dob
+                "dob": input.dob
             }
     })
         
     }
 
-const submitPin = async(pin) => {
+const submitPin = async(pin,reference) => {
 
-        return axios({
-                        method: "post",
-                        url: `${process.env.PAYSTACK_BASE_URL}/charge/submit_pin`,
-                        headers: {
+        const resp =  axios({
+                    method: "post",
+                    url: `${process.env.PAYSTACK_BASE_URL}/charge/submit_pin`,
+                    headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
                         },
-                        data: {
+                    data: {
                             "pin":pin,
                             "reference":reference
                         }
                     })
+
+                    console.log(`here: ${JSON.stringify(resp.data)}`)
+                    return resp
     }
-    const submitOtp = async(otp) => {
+const submitOtp = async(otp) => {
 
         return axios({
                         method: "post",
@@ -89,7 +91,7 @@ const submitPin = async(pin) => {
                     })
     }
 
-    const submitPhone = async(phone) => {
+const submitPhone = async(phone) => {
 
         return axios({
                         method: "post",
@@ -99,12 +101,27 @@ const submitPin = async(pin) => {
                             "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
                         },
                         data: {
-                            "otp":phone,
+                            "phone":phone,
                             "reference":reference
                         }
                     })
     }
-    const pendingCharge = async(reference) => {
+const submitBirthday = async(birthday) => {
+
+        return axios({
+                        method: "post",
+                        url: `${process.env.PAYSTACK_BASE_URL}/charge/submit_birthday`,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+                        },
+                        data: {
+                            "birthday":birthday,
+                            "reference":reference
+                        }
+                    })
+    }
+const pendingCharge = async(reference) => {
 
         return axios({
                 method: "get",
@@ -124,5 +141,6 @@ module.exports = {
     submitPin,
     submitOtp,
     submitPhone,
+    submitBirthday,
     pendingCharge
 }
