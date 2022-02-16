@@ -1,5 +1,6 @@
 require('dotenv').config()
 const axios = require('axios').default
+const fetch = require('node-fetch')
 const { v4: uuidv4 } = require('uuid')
 
 
@@ -19,6 +20,8 @@ const initalizePayment = async(data) => {
                         "ref": uuidv4()
                     }
                 })
+
+  
     }
 
 const verifyPayment = async(payment_ref) => {
@@ -36,7 +39,8 @@ return axios({
 
 const chargeTransaction = async(input) => {
 
-    return axios({
+    console.log("i got here: ", JSON.stringify(input))
+    /* return axios({
             method: "post",
             url: `${process.env.PAYSTACK_BASE_URL}/charge`,
             headers: {
@@ -48,18 +52,38 @@ const chargeTransaction = async(input) => {
                 "email": input.email,
                 "amount": parseFloat(input.amount) * 100,
                 "bank":
-                     {  "cvv":input.cvv,
-                        "accountNUmber": input.accountNUmber
+                {
+                    "code": input.cvv,
+                    "account_number": input.accountNumber
                     },
-                "dob": input.dob
+                "birthday": input.dob
             }
+    }) */
+
+    return fetch(`${process.env.PAYSTACK_BASE_URL}/charge`,
+    {
+        method: 'post',
+        body: JSON.stringify({
+            "email" : input.email,
+            "amount" : parseFloat(input.amount) * 100,
+            "bank": {
+                    code: input.cvv,
+                    account_number: input.accountNumber
+                    },
+            "birthday": input.dob
+        }),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+        },
+             
     })
         
     }
 
-const submitPin = async(pin,reference) => {
+const submitPin = async (pin, reference) => {
 
-        const resp =  axios({
+     /*return  axios({
                     method: "post",
                     url: `${process.env.PAYSTACK_BASE_URL}/charge/submit_pin`,
                     headers: {
@@ -67,14 +91,26 @@ const submitPin = async(pin,reference) => {
                             "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
                         },
                     data: {
-                            "pin":pin,
-                            "reference":reference
-                        }
-                    })
-
-                    console.log(`here: ${JSON.stringify(resp.data)}`)
-                    return resp
-    }
+                            pin :"1111",
+                            reference :"wwwddvrr4"
+                  }
+            
+      })*/
+    
+    return fetch(`${process.env.PAYSTACK_BASE_URL}/charge/submit_pin`,
+        {
+            method: 'post',
+            body: JSON.stringify({
+                pin: pin,
+                reference: reference
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+            },
+                 
+        })
+}
 const submitOtp = async(otp) => {
 
         return axios({

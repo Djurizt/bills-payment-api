@@ -142,7 +142,7 @@ const verifyTransaction = async (req, res) => {
  const chargeTransaction = async (req, res) => {
     
     // const { amount, paymentOptionType, email, phone, fullname, customer_id } = req.body
-    //  const {email, amount, cvv, accountNumber, dob } = req.body
+   //  const {email, amount, cvv, accountNumber, dob } = req.body
      
     //  const paymentSchema = Joi.object({
     //      email: Joi.string().email().required(),
@@ -168,45 +168,104 @@ const verifyTransaction = async (req, res) => {
     //     })
     
     // })
-    try {
+    // try {
     //  const responseFromJoiValidation = paymentSchema.validate(req.body)
     //      if (responseFromJoiValidation.error) {
     //          throw new Error("Bad request")
     //      }
-         const responseOnCharge = await paymentService.chargeTransaction(req.body)
-         console.log("here:" (responseOnCharge))
-         
-         if (responseOnCharge.data.status == false) {
-            throw new Error("Sorry, payment cannot be initialise at this moment, Please check the information provided")
+         paymentService.chargeTransaction(req.body)
+        .then(responseOnCharge => responseOnCharge.json())
+        .then(succ => {
+            console.log(`succ: ${JSON.stringify(succ)}`)
+            if (succ.status == false) {
+                throw new Error("Sorry, payment cannot be initialise at this moment, Please check the information provided")
+                 
+            }
+            res.status(200).send({
+                status: true,
+                message: "To confirm that you own this account, kindly enter the OTP sent to your phone",
+                data: succ.data
+            })
+        })
+        // const responseOnChargeJSON = responseOnCharge.json()
+        // console.log("here:", responseOnChargeJSON)
+
+        //  if (responseOnChargeJSON.data.status == false) {
+        //     throw new Error("Sorry, payment cannot be initialise at this moment, Please check the information provided")
              
-         }
-         ongoingTransactionReference = responseOnCharge.data.data.reference
-         //initiate on our db
-        // await paymentModel.createNewTransaction(customer_id, data.amount, data.payment_channel, data.payment_status, , data.transaction_date)
+        //  }
+        //  ongoingTransactionReference = responseOnChargeJSON.data.data.reference
+        //  //initiate on our db
+        // // await paymentModel.createNewTransaction(customer_id, data.amount, data.payment_channel, data.payment_status, , data.transaction_date)
  
-         res.status(200).send({
-             status: true,
-             message: "To confirm that you own this account, kindly enter the OTP sent to your phone",
-             data: responseOnCharge.data.data
-         })
-     } 
-     catch(error) {
+        //  res.status(200).send({
+        //      status: true,
+        //      message: "To confirm that you own this account, kindly enter the OTP sent to your phone",
+        //      data: responseOnChargeJSON.data.data
+        //  })
+    // } 
+     .catch(error =>  {
         // console.log(`error: ${e.message}`)
          res.status(400).send({
              status: false,
              message:   error.message || msgClass.GeneralError
  
       })
-     }    
+     }) 
  }       
 
 const submitPin = async (req, res) => {
-    console.log ("before paystack call, " ,req.body)
-
-
-// const { amount, paymentOptionType, email, phone, fullname, customer_id } = req.body
- const { pin, reference } = req.body
+    const { pin, reference } = req.body
  
+    console.log("before paystack call, ", req.body)
+    paymentService.submitPin(req.body.pin, req.body.reference)
+    .then(response => response.json() )
+    .then(succ => {
+            console.log("afetr l, ", JSON.stringify(succ))
+            res.status(400).send({
+                status: true,
+                message: succ.message,
+            
+         })
+    })
+    .catch(err => {
+        console.log("errr", err)
+        res.status(400).send({
+            status: false,
+        
+        })
+    })
+      
+
+    // try {
+    //     const result = await paymentService.submitPin(req.body.pin, req.body.reference)
+    //    const resultToJSON = result.json()
+    //     console.log("afetr l, ", JSON.stringify(resultToJSON))
+    //     res.status(200).send({
+    //         status: false,
+    //         message: resultToJSON.message
+        
+    //     })
+    // } catch (errr) {
+    //     console.log("errr", errr)
+    //     res.status(400).send({
+    //         status: false,
+    //         message: errr.message
+        
+    //     })
+    // }
+
+    // const { amount, paymentOptionType, email, phone, fullname, customer_id } = req.body
+   // const { pin, reference } = req.body
+ 
+    // paymentService.submitPin(pin,reference)
+    //     .then(pinResponse => { 
+    //         if (pinResponse.data.status == false) {
+    //             console.log("before throw")
+    //             throw new Error("Sorry, Invalid pin")
+    //         }
+    // }) 
+    
 //  const paymentSchema = Joi.object({
     // fullname: Joi.string().required(),
     //  pin: Joi.string().required,
@@ -215,36 +274,36 @@ const submitPin = async (req, res) => {
     // customer_id: Joi.string().required(),
     // paymentOptionType: Joi.string().valid('card','banktransfer','ussd').required()
 //  })
- try {
-//  const responseFromJoiValidation = paymentSchema.validate(req.body)
-//      if (responseFromJoiValidation.error) {
-//          throw new Error("Bad request")
+//  try {
+// //  const responseFromJoiValidation = paymentSchema.validate(req.body)
+// //      if (responseFromJoiValidation.error) {
+// //          throw new Error("Bad request")
+// //      }
+//     console.log ("before paystack call")
+//      const pinResponse = await paymentService.submitPin(pin,reference)
+//      console.log ("after paystack call")
+//      if (pinResponse.data.status == false) {
+//         console.log ("before throw")
+
+//         throw new Error("Sorry, Invalid pin")
 //      }
-    console.log ("before paystack call")
-     const pinResponse = await paymentService.submitPin(pin,reference)
-     console.log ("after paystack call")
-     if (pinResponse.data.status == false) {
-        console.log ("before throw")
+//      //initiate on our db
+//     // await paymentModel.createNewTransaction(customer_id, data.amount, data.payment_channel, data.payment_status, , data.transaction_date)
 
-        throw new Error("Sorry, Invalid pin")
-     }
-     //initiate on our db
-    // await paymentModel.createNewTransaction(customer_id, data.amount, data.payment_channel, data.payment_status, , data.transaction_date)
+//      res.status(200).send({
+//          status: true,
+//          message: "Pin submitted successfully",
+//          data: pinResponse.data.data
+//      })
+//  } 
+//  .catch(error => {
+//     console.log(`error: ${error}`)
+//      res.status(400).send({
+//          status: false,
+//          message:   error.message || msgClass.GeneralError
 
-     res.status(200).send({
-         status: true,
-         message: "Pin submitted successfully",
-         data: pinResponse.data.data
-     })
- } 
- catch(error) {
-    // console.log(`error: ${e.message}`)
-     res.status(400).send({
-         status: false,
-         message:   error.message || msgClass.GeneralError
-
-  })
- }
+//   })
+//  })
  
 
 }
